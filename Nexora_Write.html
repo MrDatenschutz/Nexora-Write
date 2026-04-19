@@ -29,10 +29,40 @@
       padding: 0 20px;
     }
 
+    #header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
     #app-title {
-      font-size: 1.4rem;
+      font-size: 1.8rem;
       color: #38bdf8;
       font-weight: 600;
+    }
+
+    /* Kleiner Offline-Download rechts der Überschrift */
+    #offline-box {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #offline-box button {
+      padding: 4px 10px;
+      background: #38bdf8;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    #offline-box button:hover {
+      background: #0ea5e9;
     }
 
     #file-name {
@@ -123,9 +153,15 @@
 <body>
 
   <div id="header">
-    <div>
+
+    <div id="header-left">
       <div id="app-title">Nexora Write</div>
-      <div id="file-name">Unbenannt.nxt</div>
+
+      <!-- KLEINER OFFLINE-DOWNLOAD -->
+      <div id="offline-box">
+        <span>Offline-Version?</span>
+        <button id="offlineDownloadBtn">Download</button>
+      </div>
     </div>
 
     <div id="header-right">
@@ -173,10 +209,9 @@
     const saveBtn = document.getElementById("saveBtn");
     const uploadBtn = document.getElementById("uploadBtn");
     const pdfBtn = document.getElementById("pdfBtn");
-    const fileNameLabel = document.getElementById("file-name");
     const fontSizeSelect = document.getElementById("fontSizeSelect");
 
-    // Toolbar Buttons
+    /* Toolbar Buttons */
     document.querySelectorAll(".tool-btn[data-cmd]").forEach(btn => {
       btn.addEventListener("click", () => {
         document.execCommand(btn.dataset.cmd, false, null);
@@ -184,13 +219,13 @@
       });
     });
 
-    // Schriftgröße
+    /* Schriftgröße */
     fontSizeSelect.addEventListener("change", () => {
       document.execCommand("fontSize", false, fontSizeSelect.value);
       editor.focus();
     });
 
-    // Speichern als .nxt
+    /* Speichern als .nxt */
     saveBtn.addEventListener("click", () => {
       const content = editor.innerHTML;
       const blob = new Blob([content], { type: "text/html;charset=utf-8" });
@@ -199,8 +234,6 @@
       if (!name) return;
       if (!name.toLowerCase().endsWith(".nxt")) name += ".nxt";
 
-      fileNameLabel.textContent = name;
-
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = name;
@@ -208,7 +241,7 @@
       URL.revokeObjectURL(link.href);
     });
 
-    // Öffnen (.nxt)
+    /* Öffnen (.nxt) */
     uploadBtn.addEventListener("click", () => {
       const input = document.createElement("input");
       input.type = "file";
@@ -217,8 +250,6 @@
       input.onchange = () => {
         const file = input.files[0];
         if (!file) return;
-
-        fileNameLabel.textContent = file.name;
 
         const reader = new FileReader();
         reader.onload = () => {
@@ -230,7 +261,7 @@
       input.click();
     });
 
-    // Export als PDF
+    /* Export als PDF */
     pdfBtn.addEventListener("click", () => {
       const opt = {
         margin: 10,
@@ -241,6 +272,14 @@
       };
 
       html2pdf().set(opt).from(editor).save();
+    });
+
+    /* Offline ZIP Download */
+    document.getElementById("offlineDownloadBtn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.href = "https://github.com/MrDatenschutz/Nexora-Write/raw/main/Nexora_Write_lokal.zip";
+      link.download = "Nexora_Write_lokal.zip";
+      link.click();
     });
   </script>
 
