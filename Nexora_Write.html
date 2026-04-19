@@ -129,6 +129,7 @@
     </div>
 
     <div id="header-right">
+      <button id="uploadBtn">Öffnen (.nxt)</button>
       <button id="saveBtn">Speichern (.nxt)</button>
       <button id="pdfBtn">Export als PDF</button>
     </div>
@@ -164,12 +165,13 @@
     </div>
   </div>
 
-  <!-- html2pdf.js (lokal eingebunden) -->
+  <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
     const editor = document.getElementById("editor");
     const saveBtn = document.getElementById("saveBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
     const pdfBtn = document.getElementById("pdfBtn");
     const fileNameLabel = document.getElementById("file-name");
     const fontSizeSelect = document.getElementById("fontSizeSelect");
@@ -206,7 +208,29 @@
       URL.revokeObjectURL(link.href);
     });
 
-    // Export als PDF (echter Download)
+    // Öffnen (.nxt)
+    uploadBtn.addEventListener("click", () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".nxt";
+
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        fileNameLabel.textContent = file.name;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          editor.innerHTML = reader.result;
+        };
+        reader.readAsText(file, "UTF-8");
+      };
+
+      input.click();
+    });
+
+    // Export als PDF
     pdfBtn.addEventListener("click", () => {
       const opt = {
         margin: 10,
