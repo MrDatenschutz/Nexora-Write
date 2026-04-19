@@ -2,11 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Nexora – Text</title>
+  <title>Nexora Write</title>
+
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -28,11 +27,6 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-    }
-
-    #header-left {
-      display: flex;
-      flex-direction: column;
     }
 
     #app-title {
@@ -94,10 +88,6 @@
       border-color: #38bdf8;
     }
 
-    .tool-select {
-      padding: 5px 8px;
-    }
-
     /* Editor */
     #editor-wrapper {
       flex: 1;
@@ -128,35 +118,16 @@
     #editor:focus {
       border-color: #38bdf8;
     }
-
-    /* Print / PDF */
-    @media print {
-      body {
-        background: #ffffff;
-      }
-      #header, #toolbar {
-        display: none;
-      }
-      #editor-wrapper {
-        padding: 0;
-      }
-      #editor {
-        border: none;
-        width: 100%;
-        max-width: 100%;
-        background: #ffffff;
-        color: #000000;
-      }
-    }
   </style>
 </head>
 <body>
 
   <div id="header">
-    <div id="header-left">
-      <div id="app-title">Nexora Text</div>
+    <div>
+      <div id="app-title">Nexora Write</div>
       <div id="file-name">Unbenannt.nxt</div>
     </div>
+
     <div id="header-right">
       <button id="saveBtn">Speichern (.nxt)</button>
       <button id="pdfBtn">Export als PDF</button>
@@ -165,7 +136,6 @@
 
   <div id="main">
     <div id="toolbar">
-      <!-- Schriftgröße -->
       <select id="fontSizeSelect" class="tool-select">
         <option value="3">Größe: Standard</option>
         <option value="2">Klein</option>
@@ -174,31 +144,28 @@
         <option value="5">Sehr groß</option>
       </select>
 
-      <!-- Fett / Kursiv / Unterstrichen -->
       <button class="tool-btn" data-cmd="bold"><b>F</b></button>
       <button class="tool-btn" data-cmd="italic"><i>K</i></button>
       <button class="tool-btn" data-cmd="underline"><u>U</u></button>
 
-      <!-- Aufzählung -->
       <button class="tool-btn" data-cmd="insertUnorderedList">• Liste</button>
       <button class="tool-btn" data-cmd="insertOrderedList">1. Liste</button>
 
-      <!-- Ausrichtung -->
       <button class="tool-btn" data-cmd="justifyLeft">Links</button>
       <button class="tool-btn" data-cmd="justifyCenter">Zentriert</button>
       <button class="tool-btn" data-cmd="justifyRight">Rechts</button>
 
-      <!-- Undo / Redo -->
       <button class="tool-btn" data-cmd="undo">↶ Undo</button>
       <button class="tool-btn" data-cmd="redo">↷ Redo</button>
     </div>
 
     <div id="editor-wrapper">
-      <div id="editor" contenteditable="true">
-        <!-- Dein Text hier -->
-      </div>
+      <div id="editor" contenteditable="true"></div>
     </div>
   </div>
+
+  <!-- html2pdf.js (lokal eingebunden) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
     const editor = document.getElementById("editor");
@@ -207,33 +174,28 @@
     const fileNameLabel = document.getElementById("file-name");
     const fontSizeSelect = document.getElementById("fontSizeSelect");
 
-    // Toolbar Buttons (execCommand)
+    // Toolbar Buttons
     document.querySelectorAll(".tool-btn[data-cmd]").forEach(btn => {
       btn.addEventListener("click", () => {
-        const cmd = btn.getAttribute("data-cmd");
-        document.execCommand(cmd, false, null);
+        document.execCommand(btn.dataset.cmd, false, null);
         editor.focus();
       });
     });
 
     // Schriftgröße
     fontSizeSelect.addEventListener("change", () => {
-      const size = fontSizeSelect.value; // 1–7
-      document.execCommand("fontSize", false, size);
+      document.execCommand("fontSize", false, fontSizeSelect.value);
       editor.focus();
     });
 
-    // Speichern als .nxt (HTML-Inhalt)
+    // Speichern als .nxt
     saveBtn.addEventListener("click", () => {
       const content = editor.innerHTML;
       const blob = new Blob([content], { type: "text/html;charset=utf-8" });
 
-      let name = prompt("Dateiname für Nexora Text (.nxt):", "Dokument");
+      let name = prompt("Dateiname:", "Dokument");
       if (!name) return;
-
-      if (!name.toLowerCase().endsWith(".nxt")) {
-        name += ".nxt";
-      }
+      if (!name.toLowerCase().endsWith(".nxt")) name += ".nxt";
 
       fileNameLabel.textContent = name;
 
@@ -244,9 +206,17 @@
       URL.revokeObjectURL(link.href);
     });
 
-    // Export als PDF (über Drucken → Als PDF speichern)
+    // Export als PDF (echter Download)
     pdfBtn.addEventListener("click", () => {
-      window.print();
+      const opt = {
+        margin: 10,
+        filename: "Nexora-Text.pdf",
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      };
+
+      html2pdf().set(opt).from(editor).save();
     });
   </script>
 
